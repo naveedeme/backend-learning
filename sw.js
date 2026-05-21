@@ -1,24 +1,22 @@
 // Service Worker — Full-Stack Mastery PWA
-const CACHE_NAME = 'fs-roadmap-v1';
+// Scoped to /backend-learning/
+const CACHE_NAME = 'fs-roadmap-v2';
+const BASE = '/backend-learning';
 const ASSETS = [
-  '.',
-  'index.html',
-  'manifest.json',
-  'assets/icons/icon-192.png',
-  'assets/icons/icon-512.png',
+  BASE + '/',
+  BASE + '/index.html',
+  BASE + '/manifest.json',
+  BASE + '/assets/icons/icon-192.png',
+  BASE + '/assets/icons/icon-512.png',
 ];
 
-// Install — cache all assets
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS.filter(a => !a.includes('googleapis')));
-    })
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
   );
   self.skipWaiting();
 });
 
-// Activate — clean old caches
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) =>
@@ -28,11 +26,10 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// Fetch — cache-first for local assets, network-first for Google Fonts
 self.addEventListener('fetch', (e) => {
   const url = new URL(e.request.url);
 
-  // Network-first for Google Fonts (external)
+  // Network-first for Google Fonts
   if (url.hostname.includes('googleapis') || url.hostname.includes('gstatic')) {
     e.respondWith(
       fetch(e.request).catch(() => caches.match(e.request))
@@ -40,16 +37,17 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // Cache-first for everything else
+  // Cache-first for local assets
   e.respondWith(
     caches.match(e.request).then((cached) => {
-      return cached || fetch(e.request).then((response) => {
-        if (response && response.status === 200) {
+      if (cached) return cached;
+      return fetch(e.request).then((response) => {
+        if (response && response.status === 200 && response.type !== 'opaque') {
           const clone = response.clone();
           caches.open(CACHE_NAME).then(cache => cache.put(e.request, clone));
         }
         return response;
-      });
+      }).catch(() => caches.match(BASE + '/index.html'));
     })
   );
 });

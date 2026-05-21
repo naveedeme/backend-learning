@@ -6,8 +6,12 @@
   <title>Full-Stack Mastery Roadmap 2026</title>
   <meta name="description" content="Complete industry-level backend + React learning roadmap for 2026. Databases, architecture, APIs, and career guidance." />
   <meta name="theme-color" content="#0a0f1e" />
-  <link rel="manifest" href="manifest.json" />
-  <link rel="apple-touch-icon" href="assets/icons/icon-192.png" />
+  <link rel="manifest" href="/backend-learning/manifest.json" />
+  <link rel="apple-touch-icon" href="/backend-learning/assets/icons/icon-192.png" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="FS Roadmap" />
+  <meta name="mobile-web-app-capable" content="yes" />
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -2211,7 +2215,13 @@ supabase
 
   /* ============ Service Worker ============ */
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('/backend-learning/sw.js', {
+      scope: '/backend-learning/'
+    }).then(reg => {
+      console.log('SW registered, scope:', reg.scope);
+    }).catch(err => {
+      console.warn('SW registration failed:', err);
+    });
   }
 </script>
 </body>
